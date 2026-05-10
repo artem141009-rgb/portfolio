@@ -1,0 +1,35 @@
+:root {
+    --bg-dark: #0b1120;
+    --bg-darker: #020408;
+    --accent: #00f2c0;
+    --accent-glow: rgba(0, 242, 192, 0.3);
+    --text-main: #f0f3f8;
+    --text-muted: #9aaebf;
+    --card-bg: rgba(18, 22, 28, 0.65);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --status-online: #00ff41;
+    --radar-color: #00ff41;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: radial-gradient(circle at top right, var(--bg-dark), var(--bg-darker));
+    background-attachment: fixed;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    line-height: 1.6;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
+/* Виправлення для термінала */
+.console-body, .terminal-mini, .log-stream {
+    font-family: 'Fira Code', monospace !important;
+}
+
+/* Решта твоїх стилів без змін... */

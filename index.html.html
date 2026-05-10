@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Artem | Fullstack & GameDev — Путівник розробника</title>
+    
+    <!-- Підключення шрифтів та іконок -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Бібліотеки для анімацій -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    
+    <style>
+        /* ========== ЗМІННІ ========== */
+        :root {
+            --bg-dark: #0b1120;
+            --bg-darker: #020408;
+            --accent: #00f2c0;
+            --accent-glow: rgba(0, 242, 192, 0.3);
+            --text-main: #f0f3f8;
+            --text-muted: #9aaebf;
+            --card-bg: rgba(18, 22, 28, 0.65);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --status-online: #00ff41;
+            --radar-color: #00ff41;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: radial-gradient(circle at top right, var(--bg-dark), var(--bg-darker));
+            background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        /* ========== НАВІГАЦІЯ ========== */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            background: rgba(8, 12, 20, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 16px 0;
+            transition: all 0.3s;
+        }
+        
+        .nav-container {
+            max-width: 1250px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+        }
+        
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: var(--accent);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+        
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+            position: relative;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent);
+            text-shadow: 0 0 8px var(--accent-glow);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0; bottom: -6px;
+            width: 0; height: 2px;
+            background: var(--accent);
+            transition: 0.3s ease-in-out;
+            box-shadow: 0 0 5px var(--accent);
+        }
+        
+        .nav-links a:hover::after, .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .menu-btn {
+            display: none;
+            font-size: 1.5rem;
+            color: #fff;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        /* ========== ГОЛОВНИЙ КОНТЕЙНЕР ========== */
+        .container {
+            max-width: 1250px;
+            margin: 100px auto 60px;
+            padding: 0 24px;
+        }
+
+        /* Bento Grid */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(220px, auto);
+            gap: 24px;
+        }
+
+        /* Базовий стиль картки */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            padding: 32px;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            will-change: transform;
+        }
+        
+        .card:hover {
+            border-color: rgba(0, 242, 192, 0.4);
+            box-shadow: 0 12px 40px rgba(0, 242, 192, 0.15);
+        }
+        
+        /* Розміри карток у сітці */
+        .span-2x2 { grid-column: span 2; grid-row: span 2; justify-content: center; }
+        .span-1x2 { grid-column: span 1; grid-row: span 2; }
+        .span-1x1 { grid-column: span 1; grid-row: span 1; justify-content: center; }
+        .span-2x1 { grid-column: span 2; grid-row: span 1; }
+        .span-4x1 { grid-column: span 4; grid-row: span 1; }
+
+        /* ========== ВІДЖЕТ СТАТУСУ (LIVE ПУЛЬСАЦІЯ) ========== */
+        .status-widget {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-direction: row;
+        }
+        .status-dot {
+            width: 16px;
+            height: 16px;
+            background: var(--status-online);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 12px var(--status-online);
+            flex-shrink: 0;
+        }
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            opacity: 0.8;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(3.5); opacity: 0; }
+        }
+        .status-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .status-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+        }
+        .status-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ========== TECH RADAR (радарна діаграма) ========== */
+        .radar-container {
+            text-align: center;
+        }
+        .radar-circle {
+            width: 140px;
+            height: 140px;
+            border: 1px solid var(--radar-color);
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            background: radial-gradient(circle, transparent 30%, rgba(0, 255, 65, 0.08) 100%);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+        .radar-scanner {
+            width: 50%;
+            height: 2px;
+            background: var(--radar-color);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: left center;
+            animation: scan 4s linear infinite;
+            box-shadow: 0 0 8px var(--radar-color);
+        }
+        @keyframes scan {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .radar-labels {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            font-family: 'Fira Code', monospace;
+            color: var(--accent);
+        }
+        .radar-labels span {
+            text-align: center;
+        }
+
+        /* ========== SYSTEM LOGS (авто-скрол) ========== */
+        .logs-box {
+            background: #05080f;
+            font-family: 'Fira Code', monospace;
+            padding: 0;
+            overflow: hidden;
+        }
+        .logs-header {
+            background: #0a0f17;
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .log-stream {
+            padding: 16px 20px;
+            height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .log-stream div {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-left: 2px solid var(--accent);
+            padding-left: 12px;
+            font-family: 'Fira Code', monospace;
+            animation: fadeInLog 0.3s ease;
+        }
+        @keyframes fadeInLog {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .log-stream::-webkit-scrollbar {
+            width: 4px;
+        }
+        .log-stream::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+        .log-stream::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        /* ========== АНІМАЦІЯ TECH STACK ORBIT ========== */
+        .skill-roadmap i, .tags .tag i {
+            transition: all 0.2s ease;
+        }
+        .skills-card:hover i, .card:has(.skill-roadmap):hover i {
+            animation: floatIcon 2.5s ease-in-out infinite;
+            display: inline-block;
+        }
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(6deg); }
+        }
+        .card:hover .tag i {
+            animation: floatIcon 2s ease-in-out infinite;
+        }
+
+        /* ========== ІНШІ СТИЛІ (збережено) ========== */
+        .code-label {
+            font-family: 'Fira Code', monospace;
+            color: var(--accent);
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: inline-block;
+        }
+        h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #fff, #b4f0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        h1 span {
+            color: var(--accent);
+            -webkit-text-fill-color: var(--accent);
+        }
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        h3 {
+            font-size: 1.3rem;
+            margin-bottom: 14px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        p {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            font-size: 1.05rem;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: auto;
+        }
+        .tag {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: 0.3s;
+            cursor: default;
+        }
+        .tag:hover {
+            background: var(--accent);
+            color: #0a0f1a;
+            border-color: var(--accent);
+        }
+        .skill-roadmap {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .skill-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .skill-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #e0e7ff;
+        }
+        .skill-info i {
+            color: var(--accent);
+            margin-right: 6px;
+            width: 16px;
+            text-align: center;
+        }
+        .skill-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .skill-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00b08a, var(--accent));
+            border-radius: 6px;
+        }
+        .guide-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .guide-list li {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        .guide-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(0, 242, 192, 0.1);
+            border: 1px solid rgba(0, 242, 192, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+        .guide-text h4 {
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+        .guide-text p {
+            font-size: 0.9rem;
+            margin-bottom: 0;
+            line-height: 1.4;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            background: var(--accent);
+            color: #0a0f1a;
+            padding: 12px 28px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+            width: fit-content;
+            margin-top: 16px;
+        }
+        .btn:hover {
+            background: #00d6a9;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px var(--accent-glow);
+        }
+        .console {
+            background: #05080f;
+            padding: 0;
+            font-family: 'Fira Code', monospace;
+        }
+        .console-header {
+            background: #0a0f17;
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .console-header span.path {
+            margin-left: 10px;
+            font-size: 0.8rem;
+            color: #9aaebf;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot.r { background: #ff5f56; }
+        .dot.y { background: #ffbd2e; }
+        .dot.g { background: #27c93f; }
+        .console-body {
+            padding: 24px;
+            color: #a5f0e0;
+            font-size: 0.95rem;
+            min-height: 160px;
+            line-height: 1.6;
+        }
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: var(--accent);
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Адаптивність */
+        @media (max-width: 1024px) {
+            .bento-grid { grid-template-columns: repeat(2, 1fr); }
+            .span-4x1 { grid-column: span 2; }
+            .guide-list { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 65px; right: -100%;
+                flex-direction: column;
+                background: rgba(8, 12, 20, 0.98);
+                backdrop-filter: blur(16px);
+                width: 100%;
+                height: calc(100vh - 65px);
+                padding: 40px 20px;
+                transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+                align-items: center;
+                gap: 40px;
+            }
+            .nav-links.active { right: 0; }
+            .nav-links a { font-size: 1.4rem; }
+            .menu-btn { display: block; }
+            .bento-grid { grid-template-columns: 1fr; }
+            .span-2x2, .span-2x1, .span-1x2, .span-1x1, .span-4x1 {
+                grid-column: span 1;
+                grid-row: auto;
+            }
+            h1 { font-size: 2.6rem; }
+            .card { padding: 24px; border-radius: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#home" class="logo"><i class="fa-solid fa-code"></i> Artem.guide</a>
+            <div class="nav-links">
+                <a href="#home" class="active">Головна</a>
+                <a href="#skills">Навички</a>
+                <a href="#projects">Проєкти</a>
+                <a href="#roadmap">Путівник</a>
+            </div>
+            <button class="menu-btn"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="bento-grid">
+            
+            <!-- 1. HERO (span-2x2) -->
+            <section id="home" class="card span-2x2" data-aos="fade-right">
+                <div class="code-label">// Артем · Fullstack & Game Developer</div>
+                <h1>Створюю код,<br>який <span>надихає</span></h1>
+                <p>16 років, Кишинів. Пишу на <strong>Python, C++ та JavaScript</strong>. Спеціалізуюсь на розробці 2D-ігор, створенні інтерактивних вебзастосунків та автоматизації.</p>
+                <div class="tags" style="margin-top: 20px;">
+                    <span class="tag"><i class="fa-solid fa-location-dot"></i> Кишинів, Молдова</span>
+                    <span class="tag"><i class="fa-solid fa-graduation-cap"></i> 10 клас</span>
+                    <span class="tag"><i class="fa-solid fa-briefcase"></i> Досвід 3+ роки</span>
+                </div>
+            </section>
+
+            <!-- 2. SKILLS (span-1x2) -->
+            <section id="skills" class="card span-1x2 skills-card" data-aos="fade-down" data-aos-delay="100">
+                <h2><i class="fa-solid fa-chart-line" style="color: var(--accent);"></i> Мій Стек</h2>
+                <div class="skill-roadmap">
+                    <div class="skill-item"><div class="skill-info"><span><i class="fa-brands fa-python"></i> Python / Pygame</span><span>90%</span></div><div class="skill-bar"><div class="skill-progress" style="width:90%"></div></div></div>
+                    <div class="skill-item"><div class="skill-info"><span><i class="fa-brands fa-js"></i> JavaScript (ES6+)</span><span>85%</span></div><div class="skill-bar"><div class="skill-progress" style="width:85%"></div></div></div>
+                    <div class="skill-item"><div class="skill-info"><span><i class="fa-brands fa-html5"></i> HTML5 / CSS3</span><span>95%</span></div><div class="skill-bar"><div class="skill-progress" style="width:95%"></div></div></div>
+                    <div class="skill-item"><div class="skill-info"><span><i class="fa-solid fa-c"></i> C++ / Алгоритми</span><span>75%</span></div><div class="skill-bar"><div class="skill-progress" style="width:75%"></div></div></div>
+                    <div class="skill-item"><div class="skill-info"><span><i class="fa-brands fa-git-alt"></i> Git / GitHub</span><span>80%</span></div><div class="skill-bar"><div class="skill-progress" style="width:80%"></div></div></div>
+                </div>
+            </section>
+
+            <!-- 3. STATUS WIDGET (span-1x1) -->
+            <div class="card status-widget span-1x1" data-aos="fade-left" data-aos-delay="150">
+                <div class="status-dot"></div>
+                <div class="status-text">
+                    <span class="status-title">Status: Available</span>
+                    <span class="status-sub">Working on Bonjour Café v2.0</span>
+                </div>
+            </div>
+
+            <!-- 4. TECH RADAR (span-1x1) – НОВИЙ ВІДЖЕТ -->
+            <div class="card span-1x1" data-aos="fade-left" data-aos-delay="200">
+                <h3><i class="fa-solid fa-chart-simple" style="color: var(--accent);"></i> Tech Radar</h3>
+                <div class="radar-container">
+                    <div class="radar-circle">
+                        <div class="radar-scanner"></div>
+                    </div>
+                    <div class="radar-labels">
+                        <span>Python</span><span>JS</span><span>C++</span><span>3D</span>
+                    </div>
+                </div>
+                <p style="font-size:0.8rem; text-align:center; margin-top:10px;">Активний фокус: веб та алгоритми</p>
+            </div>
+
+            <!-- 5. GAMEDEV (span-1x1) -->
+            <div class="card span-1x1" data-aos="fade-left" data-aos-delay="250">
+                <h3><i class="fa-solid fa-gamepad" style="color: var(--accent);"></i> GameDev</h3>
+                <p>Розробка 2D-ігор із Pygame та C++. Ігрові цикли, колізії, фізика, AI для NPC.</p>
+                <div class="tags"><span class="tag">Pygame</span><span class="tag">SFML</span></div>
+            </div>
+
+            <!-- 6. WEBDEV (span-1x1) -->
+            <div class="card span-1x1" data-aos="fade-left" data-aos-delay="300">
+                <h3><i class="fa-solid fa-globe" style="color: var(--accent);"></i> Web Розробка</h3>
+                <p>Сучасні адаптивні сайти, UI/UX, анімації, робота з API та локальними сховищами.</p>
+                <div class="tags"><span class="tag">Frontend</span><span class="tag">UI/UX</span></div>
+            </div>
+
+            <!-- 7. PROJECT 1: Bonjour Café (span-2x1) -->
+            <section id="projects" class="card span-2x1" data-aos="fade-up" data-tilt data-tilt-max="3" data-tilt-glare="true">
+                <div class="code-label">// Реальний кейс · Кав'ярня</div>
+                <h2><i class="fa-solid fa-mug-hot" style="color: var(--accent);"></i> Bonjour Café</h2>
+                <p>Сайт-меню для кав'ярні у Кишиневі: реєстрація, кошик, оформлення замовлення, адаптивна верстка. LocalStorage, SweetAlert2.</p>
+                <div class="tags"><span class="tag">JavaScript</span><span class="tag">LocalStorage</span><span class="tag">CSS Grid</span></div>
+                <a href="https://artem141009-rgb.github.io/Cafe/" target="_blank" class="btn">Переглянути сайт <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+            </section>
+
+            <!-- 8. PROJECT 2: Hand Detector (span-2x1) -->
+            <div class="card span-2x1" data-aos="fade-up" data-aos-delay="100" data-tilt data-tilt-max="3" data-tilt-glare="true">
+                <div class="code-label">// AI-експеримент · Комп'ютерний зір</div>
+                <h2><i class="fa-solid fa-hand-peace" style="color: var(--accent);"></i> Детектор рук</h2>
+                <p>Вебзастосунок для розпізнавання жестів рук у реальному часі. TensorFlow.js + HandPose, 21 ключова точка.</p>
+                <div class="tags"><span class="tag">TensorFlow.js</span><span class="tag">HandPose</span><span class="tag">Webcam API</span></div>
+                <a href="https://artem141009-rgb.github.io/control/" target="_blank" class="btn">Запустити демо <i class="fa-solid fa-camera"></i></a>
+            </div>
+
+            <!-- 9. SYSTEM LOGS (span-2x1) – НОВИЙ ВІДЖЕТ -->
+            <div class="card logs-box span-2x1" data-aos="fade-up" data-aos-delay="150">
+                <div class="logs-header">
+                    <i class="fa-solid fa-terminal" style="color: var(--accent);"></i> SYSTEM LOGS
+                    <span style="font-size: 0.7rem; font-weight: normal; color: #9aaebf;">live feed</span>
+                </div>
+                <div class="log-stream" id="log-stream">
+                    <div>[INFO] Loading portfolio modules...</div>
+                    <div>[OK] WebGL Context Initialized</div>
+                    <div>[SYSTEM] Bento Grid rendered</div>
+                </div>
+            </div>
+
+            <!-- 10. ROADMAP GUIDE (span-2x1) -->
+            <section id="roadmap" class="card span-2x1" data-aos="fade-up" data-aos-delay="200">
+                <h2><i class="fa-solid fa-map-location-dot" style="color: var(--accent);"></i> Путівник Розробника</h2>
+                <ul class="guide-list">
+                    <li><div class="guide-icon"><i class="fa-brands fa-python"></i></div><div class="guide-text"><h4>Backend & Scripts</h4><p>Автоматизація, Telegram боти, парсинг.</p></div></li>
+                    <li><div class="guide-icon"><i class="fa-solid fa-code"></i></div><div class="guide-text"><h4>Олімпіадне програмування</h4><p>C++, складні алгоритми, оптимізація.</p></div></li>
+                    <li><div class="guide-icon"><i class="fa-solid fa-mobile-screen"></i></div><div class="guide-text"><h4>Адаптивність</h4><p>Mobile-First підхід, ідеальне відображення.</p></div></li>
+                    <li><div class="guide-icon"><i class="fa-brands fa-react"></i></div><div class="guide-text"><h4>Наступний крок</h4><p>Активне вивчення React.js та Node.js.</p></div></li>
+                </ul>
+            </section>
+
+            <!-- 11. CONSOLE (span-4x1) -->
+            <div class="card console span-4x1" data-aos="zoom-in">
+                <div class="console-header"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="path">developer@artem:~/portfolio</span></div>
+                <div class="console-body" id="terminal"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Ініціалізація AOS
+        AOS.init({ duration: 800, once: true, offset: 50, easing: 'ease-out-cubic' });
+
+        // Мобільне меню
+        const menuBtn = document.querySelector('.menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        const navItems = document.querySelectorAll('.nav-links a');
+        menuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            const icon = menuBtn.querySelector('i');
+            if(navLinks.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-xmark');
+            } else {
+                icon.classList.remove('fa-xmark');
+                icon.classList.add('fa-bars');
+            }
+        });
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                menuBtn.querySelector('i').classList.remove('fa-xmark');
+                menuBtn.querySelector('i').classList.add('fa-bars');
+            });
+        });
+
+        // Активне посилання при скролі
+        window.addEventListener('scroll', () => {
+            let current = '';
+            document.querySelectorAll('section').forEach(sec => {
+                if (pageYOffset >= (sec.offsetTop - 200)) current = sec.getAttribute('id');
+            });
+            navItems.forEach(a => {
+                a.classList.remove('active');
+                if (a.getAttribute('href').includes(current)) a.classList.add('active');
+            });
+        });
+
+        // Друк у терміналі
+        const terminal = document.getElementById('terminal');
+        const lines = [
+            "> scan_profile --target=artem",
+            "> [OK] Profile found. Loading stacks...",
+            "> Python 3.11 | C++17 | JavaScript ES2022",
+            "> Active projects: Bonjour Café, Hand Detector (TF.js)",
+            "> Status: Available. Ready for collaboration.",
+            "> GitHub: https://github.com/artem141009-rgb",
+            "> $ "
+        ];
+        let lineIdx = 0, charIdx = 0;
+        function typeWriter() {
+            if (lineIdx < lines.length) {
+                if (charIdx < lines[lineIdx].length) {
+                    terminal.innerHTML += lines[lineIdx].charAt(charIdx);
+                    charIdx++;
+                    setTimeout(typeWriter, 30);
+                } else {
+                    terminal.innerHTML += "<br>";
+                    lineIdx++;
+                    charIdx = 0;
+                    setTimeout(typeWriter, 400);
+                }
+            } else {
+                terminal.innerHTML += '<span class="cursor"></span>';
+            }
+        }
+        window.addEventListener('load', () => setTimeout(typeWriter, 800));
+
+        // Авто-скрол логів (System Logs)
+        const logMessages = [
+            "[SYSTEM] Check memory usage...", "[OK] Memory stable",
+            "[PORTFOLIO] Rendering Bento-Grid", "[CONNECT] WebSocket active",
+            "[USER] Interaction detected", "[CORE] AI-Module ready",
+            "[RADAR] Scanning tech stack", "[LOGS] Stream healthy"
+        ];
+        setInterval(() => {
+            const stream = document.getElementById('log-stream');
+            if(stream) {
+                const newLog = document.createElement('div');
+                newLog.innerText = logMessages[Math.floor(Math.random() * logMessages.length)];
+                stream.appendChild(newLog);
+                stream.scrollTop = stream.scrollHeight;
+                if(stream.childNodes.length > 6) stream.removeChild(stream.childNodes[0]);
+            }
+        }, 2800);
+
+        // Антигравітаційний ефект (картки відштовхуються від миші)
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.card:not(.console)');
+            const mouseX = e.clientX, mouseY = e.clientY;
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const cardX = rect.left + rect.width/2;
+                const cardY = rect.top + rect.height/2;
+                let distX = mouseX - cardX, distY = mouseY - cardY;
+                const maxMove = 18;
+                let moveX = Math.min(maxMove, Math.max(-maxMove, (distX / window.innerWidth) * 25));
+                let moveY = Math.min(maxMove, Math.max(-maxMove, (distY / window.innerHeight) * 25));
+                const rotateX = (moveY / 20) * 2, rotateY = (moveX / 20) * -2;
+                card.style.transform = `translate(${-moveX}px, ${-moveY}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+        });
+        document.addEventListener('mouseleave', () => {
+            document.querySelectorAll('.card').forEach(c => c.style.transform = 'translate(0,0) rotateX(0deg) rotateY(0deg)');
+        });
+    </script>
+</body>
+</html>
